@@ -1,0 +1,7 @@
+#.settings/
+output/
+build/
+Debug/
+#.cproject
+#.project
+#.cwGeneratedFileSetLog
