@@ -107,8 +107,8 @@ int serial_write(uint8_t *buffer,uint8_t size)
 	uint8_t i = 0;
 	uint8_t *data = 0;
 	//uint8_t size = (uint8_t)(strlen((char *)buffer));
-
-	printf("\n\r Escrever os byte");
+	//printf("\n\r Escrever os byte");
+	printf("\n\r Frame Transmitido: ");
 
 	for(i=0;i<size;i++)
 	{
@@ -120,10 +120,13 @@ int serial_write(uint8_t *buffer,uint8_t size)
 		}
 		else
 		{
-			printf(" [%d]: %d",i,*data);
+			printf("[%d]",*data);
 		}
-		usleep(1000);
+		usleep(500);
 	}
+
+	printf("\n\r ");
+
 	return 0;
 }
 
@@ -135,7 +138,7 @@ int serial_read(uint8_t *buffer)
 	uint8_t i = 0;
 	uint8_t buf[16] = {0};
 
-	printf("\n\r Le os Bytes");
+	//printf("\n\r Le os Bytes");
 
 	if(read(serial_file_descriptor,buf,16) < 0)
 	{
@@ -146,7 +149,7 @@ int serial_read(uint8_t *buffer)
 	{
 		for(i=0;i<16;i++)
 		{
-			printf(" [%d]: %d",i,buf[i]);
+			//printf(" [%d]: %d",i,buf[i]);
 			*buffer = buf[i];
 			buffer++;
 		}

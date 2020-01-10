@@ -17,6 +17,11 @@
 #include <string.h>
 #include <stdio.h>
 
+
+#define OK	 (int)( 0 )
+#define FAIL (int)( -1)
+
+
 int serial_init (char *portname, int speed, int parity);
 int serial_write(uint8_t *buffer, uint8_t size);
 int serial_read(uint8_t *buffer);

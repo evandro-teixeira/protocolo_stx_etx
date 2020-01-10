@@ -33,7 +33,14 @@ void stx_etx_send(msg_t dt)
 	buf[i++] = stx_etx_calculate_checksum(dt);
 	buf[i++] = VALUE_ETX;
 
-	serial_write(buf,i);
+	if( serial_write(buf,i) == OK)
+	{
+		printf("\n\r Dados transmitido com sucesso. ");
+	}
+	else
+	{
+		printf("\n\r Falha em transmitir dados. ");
+	}
 }
 
 /**
