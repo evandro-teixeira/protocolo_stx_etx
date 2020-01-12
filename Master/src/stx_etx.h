@@ -26,5 +26,6 @@ typedef struct
 }msg_t;
 
 void stx_etx_send(msg_t dt);
+uint8_t stx_etx_calculate_checksum(msg_t data);
 
 #endif /* STX_ETX_H_ */

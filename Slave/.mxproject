@@ -1,7 +1,7 @@
 [PreviousGenFiles]
-HeaderPath=/home/evandro/work/protocolo_stx_etx/Inc
+HeaderPath=/home/evandro/GitHub/protocolo_stx_etx/Slave/Inc
 HeaderFiles=gpio.h;FreeRTOSConfig.h;usart.h;stm32f0xx_it.h;stm32f0xx_hal_conf.h;main.h;crc.h;
-SourcePath=/home/evandro/work/protocolo_stx_etx/Src
+SourcePath=/home/evandro/GitHub/protocolo_stx_etx/Slave/Src
 SourceFiles=gpio.c;freertos.c;usart.c;stm32f0xx_it.c;stm32f0xx_hal_msp.c;main.c;stm32f0xx_hal_timebase_tim.c;crc.c;
 
 [PreviousLibFiles]

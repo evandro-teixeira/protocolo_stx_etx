@@ -11,7 +11,7 @@
 /**
  *
  */
-uint8_t stx_etx_calculate_checksum(msg_t data);
+//uint8_t stx_etx_calculate_checksum(msg_t data);
 
 /*
  *

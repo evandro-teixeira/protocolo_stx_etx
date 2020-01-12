@@ -20,7 +20,6 @@ QueueHandle_t queue_msg_in;
  */
 void stx_etx_task_rx(void *pvParameters);
 void stx_etx_task_tx(void *pvParameters);
-//uint8_t stx_etx_calculate_crc(data_msg_t data);
 uint8_t stx_etx_calculate_checksum(data_msg_t data);
 status_interpreter_t stx_etx_interpreter(data_rx_t data_in/*, data_msg_t *data_out*/);
 
@@ -68,18 +67,12 @@ void stx_etx_init(void)
  */
 void stx_etx_task_rx(void *pvParameters)
 {
-	char txt[32];
-//	uint8_t i = 0;
 	data_rx_t data_rx;
-//	static data_msg_t data_tx;
 
 	while(1)
 	{
 		if(xQueueReceive(queue_data_rx,&data_rx,(TickType_t)portMAX_DELAY) == pdTRUE)
 		{
-//			sprintf(txt,"\n\r%d %lu",data_rx.data, data_rx.time);
-//			MX_USART1_UART_String(txt);
-
 			switch( stx_etx_interpreter(data_rx/*,&data_tx*/) )
 			{
 			    case FAULT_START_BYTE:
@@ -103,13 +96,10 @@ void stx_etx_task_rx(void *pvParameters)
 			    break;
 				case MSG_COMPLETED:
 					/* Send Data of App*/
-//					if(data_tx != NULL)
-//					{
-						if(xQueueSend(queue_msg_in,&data,(TickType_t)portMAX_DELAY) != pdPASS)
-						{
-							/* Failed to post the message  */
-						}
-//					}
+					if(xQueueSend(queue_msg_in,&data,(TickType_t)portMAX_DELAY) != pdPASS)
+					{
+						/* Failed to post the message  */
+					}
 				break;
 				case IDLE:
 				case PROCESSING:
@@ -176,7 +166,6 @@ bool stx_etx_queue_receive(data_msg_t *data_out, uint32_t tick)
 	if(xQueueReceive(queue_msg_in,&data,(TickType_t)tick) == pdTRUE)
 	{
 		*data_out = data;
-		//data_out = &data;
 		ret = true;
 	}
 	return ret;
@@ -249,11 +238,8 @@ status_interpreter_t stx_etx_interpreter(data_rx_t data_in /*,data_msg_t *data_o
 	static state_data_t state_data = BYTE_NUMBER;
 	static state_interpreter_t state_interpreter = SYN1;
 	static data_rx_t data_old = {0};
-	//static msg_t msg = {0};
-	//static data_msg_t data = {0};
 	static uint8_t index_data = 0;
 	status_interpreter_t ret = IDLE;
-	//data_out = NULL;
 
 	/* Check the time delta between bytes */
 	if((data_in.time - data_old.time) > TIMEOUT)
@@ -268,7 +254,6 @@ status_interpreter_t stx_etx_interpreter(data_rx_t data_in /*,data_msg_t *data_o
 			/* Check byte value SYN */
 			if(data_in.data == VALUE_SYN)
 			{
-				//msg.syn1 = data_in.data;
 				state_interpreter = SYN2;
 				ret = PROCESSING;
 			}
@@ -279,152 +264,100 @@ status_interpreter_t stx_etx_interpreter(data_rx_t data_in /*,data_msg_t *data_o
 			}
 		break;
 		case SYN2: /* Start Byte 1 */
-			/* Check the time delta between bytes */
-//			if((data_in.time - data_old.time) < TIMEOUT)
-//			{
-				/* Check byte value SYN */
-				if(data_in.data == VALUE_SYN)
-				{
-					//msg.syn2 = data_in.data;
-					state_interpreter = STX;
-					ret = PROCESSING;
-				}
-				else
-				{
-					/* signals failure and returns to initial state */
-					state_interpreter = SYN1;
-					ret = FAULT_START_BYTE;
-				}
-//			}
-//			else
-//			{
-//				/* signals failure and returns to initial state */
-//				state_interpreter = SYN1;
-//				ret = FAULT_TIMEOUT;
-//			}
+			/* Check byte value SYN */
+			if(data_in.data == VALUE_SYN)
+			{
+				state_interpreter = STX;
+				ret = PROCESSING;
+			}
+			else
+			{
+				/* signals failure and returns to initial state */
+				state_interpreter = SYN1;
+				ret = FAULT_START_BYTE;
+			}
 		break;
 		case STX: /* Start Byte 2 */
-			/* Check the time delta between bytes */
-//			if((data_in.time - data_old.time) < TIMEOUT)
-//			{
-				/* Check byte value STX */
-				if(data_in.data == VALUE_STX)
-				{
-					//msg.stx = data_in.data;
-					state_interpreter = DATA;
-					state_data = BYTE_NUMBER;
-					ret = PROCESSING;
-				}
-				else
-				{
-					/* signals failure and returns to initial state */
-					state_interpreter = SYN1;
-					ret = FAULT_START_BYTE;
-				}
-//			}
-//			else
-//			{
-//				/* signals failure and returns to initial state */
-//				state_interpreter = SYN1;
-//				ret = FAULT_TIMEOUT;
-//			}
+			/* Check byte value STX */
+			if(data_in.data == VALUE_STX)
+			{
+				state_interpreter = DATA;
+				state_data = BYTE_NUMBER;
+				ret = PROCESSING;
+			}
+			else
+			{
+				/* signals failure and returns to initial state */
+				state_interpreter = SYN1;
+				ret = FAULT_START_BYTE;
+			}
 		break;
 		case DATA: /* Message assembler */
-			/* Check the time delta between bytes */
-//			if((data_in.time - data_old.time) < TIMEOUT)
-//			{
-				ret = PROCESSING;
+			ret = PROCESSING;
 
-				switch(state_data)
-				{
-					case BYTE_NUMBER:
-						state_data = COMMAND;
-						//msg.data.byte_number = data_in.data;
-						data.byte_number = data_in.data;
-					break;
-					case COMMAND:
-						state_data = DATA_ASSEMBLER;
-						//msg.data.command = data_in.data;
-						data.command = data_in.data;
-						index_data=0;
-					break;
-					case DATA_ASSEMBLER:
-						//msg.data.data[index_data++] = data_in.data;
-						data.data[index_data++] = data_in.data;
-						if(index_data >= data.byte_number)
-						{
-							state_data = BYTE_NUMBER;
-							state_interpreter = CHK_CRC;
-						}
-					break;
-					case MAX_STATE_DATA:
-					default:
-						/* signals failure and returns to initial state */
-						state_interpreter = SYN1;
+			switch(state_data)
+			{
+				case BYTE_NUMBER:
+					state_data = COMMAND;
+					data.byte_number = data_in.data;
+				break;
+				case COMMAND:
+					if(data.byte_number == 0)
+					{
 						state_data = BYTE_NUMBER;
-						ret = FAULT_INTERNAL_ERROR;
-					break;
-				}
-//			}
-//			else
-//			{
-//				/* signals failure and returns to initial state */
-//				state_interpreter = SYN1;
-//				ret = FAULT_TIMEOUT;
-//			}
+						state_interpreter = CHK_CRC;
+					}
+					else
+					{
+						state_data = DATA_ASSEMBLER;
+					}
+					data.command = data_in.data;
+					index_data=0;
+				break;
+				case DATA_ASSEMBLER:
+					//msg.data.data[index_data++] = data_in.data;
+					data.data[index_data++] = data_in.data;
+					if(index_data >= data.byte_number)
+					{
+						state_data = BYTE_NUMBER;
+						state_interpreter = CHK_CRC;
+					}
+				break;
+				case MAX_STATE_DATA:
+				default:
+					/* signals failure and returns to initial state */
+					state_interpreter = SYN1;
+					state_data = BYTE_NUMBER;
+					ret = FAULT_INTERNAL_ERROR;
+				break;
+			}
 		break;
 		case CHK_CRC:
-			/* Check the time delta between bytes */
-//			if((data_in.time - data_old.time) < TIMEOUT)
-//			{
-				/* computes the received message's CRC value
-				 * and compares the transmitted CRC value */
-				//if(data.data == stx_etx_calculate_crc(msg.data))
-				if(data_in.data == stx_etx_calculate_checksum(data))
-				{
-					state_interpreter = ETX;
-				//	*data_out = msg.data;
-				}
-				else
-				{
-					/* signals failure and returns to initial state */
-					state_interpreter = SYN1;
-					ret = FAULT_INCORRECT_CRC;
-				}
-//			}
-//			else
-//			{
-//				/* signals failure and returns to initial state */
-//				state_interpreter = SYN1;
-//				ret = FAULT_TIMEOUT;
-//			}
+			/* computes the received message's CRC value
+			 * and compares the transmitted CRC value */
+			if(data_in.data == stx_etx_calculate_checksum(data))
+			{
+				state_interpreter = ETX;
+			}
+			else
+			{
+				/* signals failure and returns to initial state */
+				state_interpreter = SYN1;
+				ret = FAULT_INCORRECT_CRC;
+			}
 		break;
 		case ETX: /* Stop Byte  */
-//			if((data_in.time - data_old.time) < TIMEOUT)
-//			{
-				if(data_in.data == VALUE_ETX)
-				{
-					//data_msg_t dt = {0};
-					//data_out = &(data_msg_t)msg.data;
-					//dt = msg.data;
-					//data_out = &data;
-					//*data_out = data;
-					state_interpreter = SYN1;
-					ret = MSG_COMPLETED;
-				}
-				else
-				{
-					/* signals failure and returns to initial state */
-					state_interpreter = SYN1;
-					ret = FAULT_STOP_BYTE;
-				}
-//			}
-//			else
-//			{
-//				/* signals failure and returns to initial state */
-//				state_interpreter = SYN1;
-//				ret = FAULT_TIMEOUT;
-//			}
+			if(data_in.data == VALUE_ETX)
+			{
+				state_interpreter = SYN1;
+				ret = MSG_COMPLETED;
+			}
+			else
+			{
+				/* signals failure and returns to initial state */
+				state_interpreter = SYN1;
+				ret = FAULT_STOP_BYTE;
+			}
 		break;
 		case MAX_STATE_INTERPRETER:
 		default:
@@ -439,4 +372,3 @@ status_interpreter_t stx_etx_interpreter(data_rx_t data_in /*,data_msg_t *data_o
 
 	return ret;
 }
-

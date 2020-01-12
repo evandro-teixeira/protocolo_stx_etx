@@ -37,7 +37,7 @@ void app_init(void)
  */
 void app_task(void *pvParameters)
 {
-	static data_msg_t data_in;
+	static data_msg_t data_in = {0};
 	static data_msg_t data_out = {0};
 
 	app_led_green(0 /* Off */);
@@ -45,8 +45,8 @@ void app_task(void *pvParameters)
 
 	while(1)
 	{
-		//if(stx_etx_queue_receive(&data_in,/*portMAX_DELAY*/10) == true)
-		if(xQueueReceive(queue_msg_in,&data_in,(TickType_t)portMAX_DELAY) == pdTRUE)
+		if(stx_etx_queue_receive(&data_in,portMAX_DELAY) == true)
+		//if(xQueueReceive(queue_msg_in,&data_in,(TickType_t)portMAX_DELAY) == pdTRUE)
 		{
 			/* State machine with the commands */
 			switch(data_in.command)
@@ -75,7 +75,7 @@ void app_task(void *pvParameters)
 				default:
 					/* Signals failure */
 					data_out.byte_number = 1;
-					data_out.command = 1; 	// Status Faul
+					data_out.command = 0; 	// Status Faul
 					data_out.data[0] = 255;	// Cod. Error
 				break;
 			}
@@ -115,5 +115,6 @@ void app_status_button_set(bool data)
  */
 bool app_status_button_get(void)
 {
+	status_button = HAL_GPIO_ReadPin(USER_BUTTON_GPIO_Port,USER_BUTTON_Pin);
 	return status_button;
 }

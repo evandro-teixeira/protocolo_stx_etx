@@ -107,7 +107,8 @@ void MX_FREERTOS_Init(void) {
 /* USER CODE END Header_StartDefaultTask */
 void StartDefaultTask(void const * argument)
 {
-	/* USER CODE BEGIN StartDefaultTask */
+
+  /* USER CODE BEGIN StartDefaultTask */
 	/* Infinite loop */
 	stx_etx_init();
 	app_init();
@@ -117,7 +118,7 @@ void StartDefaultTask(void const * argument)
 		//osDelay(1000);
 		osThreadTerminate(defaultTaskHandle);
 	}
-	/* USER CODE END StartDefaultTask */
+  /* USER CODE END StartDefaultTask */
 }
 
 /* Private application code --------------------------------------------------*/
